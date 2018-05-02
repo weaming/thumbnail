@@ -13,7 +13,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-func thumbnail(path, outpath, ext string, width, height uint) error {
+func thumbnail(path, outpath string, width, height uint) error {
 	// open "test.jpg"
 	file, err := os.Open(path)
 	if err != nil {
@@ -21,17 +21,7 @@ func thumbnail(path, outpath, ext string, width, height uint) error {
 	}
 
 	// decode jpeg into image.Image
-	var img image.Image
-	switch ext {
-	case ".jpg":
-		img, err = jpeg.Decode(file)
-	case ".png":
-		img, err = png.Decode(file)
-	case ".gif":
-		img, err = gif.Decode(file)
-	default:
-		img, err = jpeg.Decode(file)
-	}
+	img, format, err := image.Decode(file)
 	if err != nil {
 		return err
 	}
@@ -48,12 +38,12 @@ func thumbnail(path, outpath, ext string, width, height uint) error {
 	defer out.Close()
 
 	// write new image to file
-	switch ext {
-	case ".jpg", ".jpeg":
+	switch format {
+	case "jpg", "jpeg":
 		jpeg.Encode(out, m, nil)
-	case ".png":
+	case "png":
 		png.Encode(out, m)
-	case ".gif":
+	case "gif":
 		gif.Encode(out, m, nil)
 	default:
 		jpeg.Encode(out, m, nil)
@@ -91,9 +81,9 @@ func thumb_directory(tododir, outdir string, width, height uint) (int, error) {
 		}
 
 		fmt.Printf("Thumbnailing: %v\n", rel_path)
-		err = thumbnail(file, out_path, fp.Ext(file), width, height)
+		err = thumbnail(file, out_path, width, height)
 		if err != nil {
-			err := thumbnail(file, out_path, fp.Ext(".jpg"), width, height)
+			err := thumbnail(file, out_path, width, height)
 			if err != nil {
 				return count, err
 			}

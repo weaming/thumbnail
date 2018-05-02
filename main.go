@@ -11,8 +11,8 @@ import (
 func main() {
 	var INDIR = flag.String("i", ".", "The input directory to be thumnail.")
 	var OUTDIR = flag.String("o", "", "The output directory to save thumnail. Default [$INPUT/../thumbnail]")
-	var MAX_WIDTH = flag.Uint("w", 500, "The maximum width of output photo.")
-	var MAX_HEIGHT = flag.Uint("h", 500, "The maximum height of output photo.")
+	var MAX_WIDTH = flag.Uint("width", 1280, "The maximum width of output photo.")
+	var MAX_HEIGHT = flag.Uint("height", 1280, "The maximum height of output photo.")
 	var outdir = ""
 	flag.Parse()
 
