@@ -6,6 +6,8 @@ import (
 	"os"
 	fp "path/filepath"
 	"time"
+
+	libfs "github.com/weaming/golib/fs"
 )
 
 func main() {
@@ -16,16 +18,6 @@ func main() {
 	var outdir = ""
 	flag.Parse()
 
-	fi, err := os.Stat(*INDIR)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-	if !fi.IsDir() {
-		fmt.Fprintln(os.Stderr, "The input path should be a directory!!")
-		os.Exit(1)
-	}
-
 	if *OUTDIR != "" {
 		outdir = *OUTDIR
 	} else {
@@ -33,7 +25,24 @@ func main() {
 	}
 
 	start := time.Now()
-	fmt.Printf("To be process direcotry: [%v]\n", *INDIR)
-	count, _ := thumb_directory(*INDIR, outdir, *MAX_WIDTH, *MAX_HEIGHT)
-	fmt.Printf("Processed photos: %v; Time cost: %v\n", count, time.Since(start))
+	if libfs.IsDir(*INDIR) {
+		fmt.Printf("To be process direcotry: [%v]\n", *INDIR)
+		count, _ := thumb_directory(*INDIR, outdir, *MAX_WIDTH, *MAX_HEIGHT)
+		fmt.Printf("Processed photos: %v; Time cost: %v\n", count, time.Since(start))
+	} else if libfs.IsFile(*INDIR) {
+		fmt.Printf("To be process image: %v\n", *INDIR)
+		if !libfs.Exist(outdir) {
+			err := os.MkdirAll(outdir, 0755)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+		err := thumbnail(*INDIR, fp.Join(outdir, fp.Base(*INDIR)), *MAX_WIDTH, *MAX_HEIGHT)
+		if err != nil {
+			fmt.Printf("failed thumbnail: %v\n", err)
+		} else {
+			fmt.Printf("Time cost: %v\n", time.Since(start))
+		}
+	}
 }
